@@ -1,22 +1,22 @@
 {
     "compilerOptions": {
-        // Allow importing like `import React from 'react'`
+        "_comment": "Allow importing like `import React from 'react'`",
         "allowSyntheticDefaultImports": true,
-        // Use ES2015 module system
+        "_comment": "Use ES2015 module system",
         "module": "es2015",
-        // Resolve modules using Node-resolution algorithm -> looks in node_modules when importing from non-relative path
+        "_comment": "Resolve modules using Node-resolution algorithm -> looks in node_modules when importing from non-relative path",
         "moduleResolution": "node",
-        // Set React as the JSX factory
+        "_comment": "Set React as the JSX factory... I don't know what that actually means",
         "jsx": "react",
-        // Target ES6 for more modern browsers
+        "_comment": " Target ES6 for more modern browsers",
         "target": "es6",
-        // Include typings from built-in lib declarations
+        "_comment": "Include typings from built-in lib declarations",
         "lib": [
             "es2015",
             "dom",
             "dom.iterable"
         ],
-        // Include module source maps for debugging
-        "sourceMap": true,
+        "_comment": "Include module source maps for debugging",
+        "sourceMap": true
     }
 }
