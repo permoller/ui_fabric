@@ -2,8 +2,10 @@
     "compilerOptions": {
         // Allow importing like `import React from 'react'`
         "allowSyntheticDefaultImports": true,
-        // No module system, concatenated file
+        // Use ES2015 module system
         "module": "es2015",
+        // Resolve modules using Node-resolution algorithm -> looks in node_modules when importing from non-relative path
+        "moduleResolution": "node",
         // Set React as the JSX factory
         "jsx": "react",
         // Target ES6 for more modern browsers
