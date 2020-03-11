@@ -1,7 +1,7 @@
 {
   "name": "ui_fabric",
   "version": "1.0.0",
-  "description": "Experiments with UI Fabric",
+  "description": "React app with typescript build with webpack for playing with UI Fabric",
   "main": "index.js",
   "dependencies": {
     "office-ui-fabric-react": "^7.101.0",

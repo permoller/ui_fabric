@@ -10,7 +10,7 @@ export const App = () => {
 
     return (
         <>
-            <div>React app with typescript build with webpack and included UI Fabric</div>
+            <div>React app with typescript build with webpack for playing with UI Fabric</div>
             <PrimaryButton>UI Fabric Primary button</PrimaryButton>
             <TagPickerWithRefreshDemo />
         </>)
