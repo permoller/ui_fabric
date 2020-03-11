@@ -1,2 +1,3 @@
-# react_typescript
-An attempt at setting up a react application with typescript from scratch
+# ui_fabric
+React app for playing with UI Fabric.
+Repo based on my other repo: react_typescript.
