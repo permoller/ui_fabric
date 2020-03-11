@@ -2,7 +2,7 @@ import { styled, IBasePickerStyleProps, IBasePickerStyles, ITag, ITagPickerProps
 import { getStyles } from "office-ui-fabric-react/lib/components/pickers/BasePicker.styles";
 
 export class TagPickerWithResfreshBase extends TagPickerBase {
-    public refreshSuggestions = () => {
+    public refreshSuggestionsUsingSubclassToAccessProtectedMembers = () => {
         if (!this.state.suggestionsVisible) return;
         const value = this.input.current.value;
         if (value === '' && (this.props.onEmptyResolveSuggestions || this.props.onEmptyInputFocus)) {
