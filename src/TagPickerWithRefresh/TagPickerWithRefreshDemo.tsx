@@ -1,10 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { timeoutAsync, getRandomStrings } from "../utils";
-import { TagPickerBase, BasePicker, IBasePickerProps, TagPicker } from "office-ui-fabric-react";
+import { TagPickerBase, BasePicker, IBasePickerProps, TagPicker, ITag } from "office-ui-fabric-react";
 import { TagPickerWithRefresh, TagPickerWithResfreshBase } from "./TagPickerWithRefresh";
 
 export const TagPickerWithRefreshDemo = () => {
-
 
     const picker1Ref = React.useRef<TagPickerBase>(null);
     const picker2Ref = React.useRef<TagPickerWithResfreshBase>(null);
@@ -25,6 +24,7 @@ export const TagPickerWithRefreshDemo = () => {
             p.updateValue(value);
         }
     }
+
     const refreshSuggestionsUsingBindingToThisToAccessProtectedMembers = (picker: TagPickerBase) => {
         // this method does not work with the generic PickerBase
         const refreshSuggestions = function (this: TagPickerBase) {
@@ -41,18 +41,27 @@ export const TagPickerWithRefreshDemo = () => {
         refreshSuggestions.bind(picker)();
     }
 
-
-    const getRandomSuggestionsAsync = async () => {
-        console.log("fetching suggestions");
-        await timeoutAsync(2000);
-        return getRandomStrings().map(s => ({ key: s, name: s }));
+    const getRandomSuggestionsAsync = async (): Promise<ITag[]> => {
+        const strings = getRandomStrings();
+        console.log("fetching suggestions", strings);
+        await timeoutAsync(1000);
+        return strings.map(s => ({ key: s, name: s }))
     }
 
-    setInterval(() => {
-        refreshSuggestionsUsingCastToAnyToAccessProtectedMembers(picker1Ref.current);
-        picker2Ref.current.refreshSuggestionsUsingSubclassToAccessProtectedMembers();
-        refreshSuggestionsUsingBindingToThisToAccessProtectedMembers(picker3Ref.current);
-    }, 5000);
+    const refreshIntervalSeconds = 5;
+    const [refreshTimeout, setRefreshTimout] = useState(refreshIntervalSeconds);
+    useEffect(() => {
+        if (refreshTimeout === 0) {
+            console.log("refresh");
+            refreshSuggestionsUsingCastToAnyToAccessProtectedMembers(picker1Ref.current);
+            picker2Ref.current.refreshSuggestionsUsingSubclassToAccessProtectedMembers();
+            refreshSuggestionsUsingBindingToThisToAccessProtectedMembers(picker3Ref.current);
+        }
+
+        const timeout = setTimeout(() => setRefreshTimout(refreshTimeout > 0 ? refreshTimeout - 1 : refreshIntervalSeconds), 1000);
+        return () => clearTimeout(timeout);
+
+    }, [refreshTimeout]);
 
     return (
         <>
@@ -61,12 +70,13 @@ export const TagPickerWithRefreshDemo = () => {
                 Der genereres tilfældige valgmuligheder hver gang listen af valgmuligheder vises.
                 Hentning af valgmuligheder tager et sekund. I dette sekund vises en spinner.
                 Der logges en besked til konsollen hver gang valgmulighederne hentes.
-                Hvert 5. sekund vil TagPicker komponenterne bliver bedt om at genindlæse listen af valgmuligheder.
+                Hvert 5. sekund vil TagPicker komponenterne bliver bedt om at genindlæse listen af valgmuligheder. Det logges også til konsollen.
             </p>
             <p>
                 Måden de forskellige komponenter tvinges til at genindlæse valgmulighederne er den samme. Det sker ved at tilgå nogle protectede properties på PickerBase.
                 Her er nogle forskellige måder at tilgå de protectede felter.
             </p>
+            <p>Genindlæser om: {refreshTimeout}</p>
             <p>Dette er en TagPicker hvor vi laver et cast til any for at tilgå protected felter.</p>
             <TagPicker
                 componentRef={picker1Ref}
