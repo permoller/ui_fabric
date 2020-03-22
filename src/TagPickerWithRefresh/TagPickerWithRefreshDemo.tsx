@@ -65,7 +65,6 @@ export const TagPickerWithRefreshDemo = () => {
 
     return (
         <>
-            <h1>Demo af TagPicker som kan opdatere listen af valgmuligheder</h1>
             <p>
                 Der genereres tilfældige valgmuligheder hver gang listen af valgmuligheder vises.
                 Hentning af valgmuligheder tager et sekund. I dette sekund vises en spinner.
