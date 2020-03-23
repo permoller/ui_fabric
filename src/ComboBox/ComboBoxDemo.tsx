@@ -15,58 +15,13 @@ const allOptions: IComboBoxOption[] = [
     { key: "red3", text: "Red3" }
 ]
 
-
-const filteredKeyDelimiterString = "____"
-
-const isOptionWithMatchInformation = (option: IComboBoxOption) => typeof option.key === "string" && option.key.indexOf(filteredKeyDelimiterString) >= 0;
-
-const getStartAndEndOfMatch = (option: IComboBoxOption) => {
-    const keySegments = option.key.toString().split(filteredKeyDelimiterString, 3);
-    const matchStart = parseInt(keySegments[0]);
-    const matchEnd = parseInt(keySegments[1]);
-    return [matchStart, matchEnd];
-}
-const mapToOptionWithMatchInformation = (option: IComboBoxOption, filter: string) => {
-    if (isOptionWithMatchInformation(option)) {
-        return mapToOptionWithMatchInformation(option.data, filter);
-    }
-    const text = option.text;
-    const matchStart = text.toLocaleLowerCase().indexOf(filter);
-    if (matchStart >= 0) {
-        const matchEnd = matchStart + filter.length;
-        const newKey = matchStart + filteredKeyDelimiterString + matchEnd + filteredKeyDelimiterString + option.key;
-        return { ...option, key: newKey, data: option };
-    }
-    return undefined;
-}
-
-const filterOptions = (options: IComboBoxOption[], filter: string) => {
-    if (filter === undefined) {
+const filterOptions = (options: IComboBoxOption[], filter: string | undefined) => {
+    const f = (filter ?? "").toLocaleLowerCase().trim();
+    if (f === "") {
         return options;
     }
-    return options
-        .map(o => mapToOptionWithMatchInformation(o, filter))
-        .filter(o => o !== undefined);
-}
 
-const onRenderOptionWithMatchHeighlight = (option: ISelectableOption) => {
-    const text = option.text;
-    if (isOptionWithMatchInformation(option)) {
-        const [matchStart, matchEnd] = getStartAndEndOfMatch(option);
-
-        const textBeforeMatch = matchStart === 0 ? undefined : text.substring(0, matchStart);
-        const textThatMatches = text.substring(matchStart, matchEnd);
-        const textAfterMatch = matchEnd < text.length ? text.substring(matchEnd) : undefined;
-
-        return (<>
-            {textBeforeMatch ?? <span>{textBeforeMatch}</span>}
-            <span style={{ fontWeight: "bold" }}>{textThatMatches}</span>
-            {textAfterMatch ?? <span>{textAfterMatch}</span>}
-        </>);
-
-    }
-    return <span>{option.text}</span>
-
+    return options.filter(o => o.text.toLocaleLowerCase().indexOf(f) >= 0);
 }
 
 export const ComboBoxDemo = () => {
@@ -76,7 +31,7 @@ export const ComboBoxDemo = () => {
     const [currentOption, setCurrentOption] = useState<IComboBoxOption | undefined>();
     const [hasFocus, setHasFocus] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [filterText, setFilterTextWithoutNormalizingIt] = useState<string | undefined>()
+    const [filterText, setFilterText] = useState<string | undefined>()
 
     const comboBoxRef = useRef<IComboBox>();
     const ensureMenuIsOpen = () => {
@@ -84,15 +39,6 @@ export const ComboBoxDemo = () => {
             comboBoxRef.current.focus(true);
         }
     }
-
-    const setFilterText = (newFilterText: string | undefined) => {
-        const lowercaseAndTrimmed = newFilterText?.toLocaleLowerCase()?.trim();
-        const newText = lowercaseAndTrimmed === "" ? undefined : lowercaseAndTrimmed;
-        if (filterText !== newText) {
-            setFilterTextWithoutNormalizingIt(newFilterText);
-        }
-    }
-
 
     return (<WithLog>{(log) =>
         <>
@@ -107,27 +53,22 @@ export const ComboBoxDemo = () => {
                 // TODO: jeg ved ikke helt om det er nødvendigt at angive denne funktion for at få filtrering eller om det er nok at sætte options
                 onResolveOptions={(options) => {
                     log("onResolveOptions", options);
-                    return filterOptions(options, filterText);
+                    return filterOptions(allOptions, filterText);
                 }}
-                // vi vil ikke have den til automatisk at foreslå resten af teksten... det virker kun når man skriver starten af en valgmulighed
+                // vi vil ikke have den til automatisk at foreslå resten af teksten... det virker ikke rigtigt
                 autoComplete={"off"}
                 // vi sætter text eksplicit til den valgte text fra onChange
-                text={currentText}
+                text={selectedText ?? ""}
                 // vi sætter selectedKey eksplicit til den valgte option fra onChange
-                selectedKey={currentOption?.key}
+                selectedKey={selectedOption?.key ?? null}
                 // onChange kaldes når der trykkes enter eller feltet forlades
                 onChange={(event, option, index, value) => {
                     log("onChange", { event, option, index, value });
-                    setSelectedText(value);
+                    setSelectedText(undefined);
                     setSelectedOption(option);
-                    setCurrentText(value);
-                    setCurrentOption(option);
-                    if (option) {
-                        // der er valgt noget så vi nulstiller søgeteksten så alle valgmuligheder vises hvis menuen med valgmuligheder åbnes
-                        setFilterText(undefined);
-                    } else {
-                        setFilterText(value);
-                    }
+                    setCurrentText(undefined);
+                    setCurrentOption(undefined);
+                    setFilterText(undefined);
                 }}
                 // onPendingValueChanged kaldes på mange tidspunkter...
                 // Hvis der tastes i feltet og teksten ikke er magen til teksten fra en af valgmulighederne gives den tastede tekst med i value og option er undefined.
@@ -139,39 +80,28 @@ export const ComboBoxDemo = () => {
                     if (option !== undefined || value !== undefined) {
                         setCurrentText(value);
                         setCurrentOption(option);
-
-                        if (value !== undefined) {
-                            // hvis der er tastet noget og det ikke er magen til en af valgmulighederne
-                            // får vi den tastede tekst i value og kan bruge den til at filtrere med.
-                            setFilterText(value);
-                        } else {
-                            // Hvis vi har fået en valgmulighed ved vi ikke om det er fordi der er tastet noget,
-                            // som er magen til en valgmulighed, eller om det er fordi
-                            // en valgmulighed er markeret med piletasterne eller musen.
-                            // Så vi ved ikke om filterText skal opdateres eller ej!!!
-
-                            // Vi er nødt til at tilgå et privat felt på ComboBox'en for at få fat i Autofill-komponenten som bruges internt til tekstfeltet
-                            const autofillRef: React.RefObject<IAutofill | undefined> = (comboBoxRef.current as any)?._autofill;
-                            // Med Autofill-kompoonenten kan vi se om teksten er markeret eller ej.
-                            // Hvis teksten er markeret er det fordi ComboBox'en har sat suggestedDisplayValue til en valgmulighed
-                            // og det gør den når man bruger pilene til at markere en valgmulighed i menuen.
-                            // Det vil sige vi skal kun opdatere filterText hvis teksten i feltet ikke er markeret
-                            if (!autofillRef?.current?.isValueSelected) {
-                                // Vi tager teksten direkte fra Autofill-kombonenten.
-                                // Vi får ikke værdien ind via value og valgmuligheden i option
-                                // kan være en som er markeret med musen så den kan vi ikke regne med.
-                                console.log(autofillRef?.current);
-                                const v = autofillRef?.current?.value;
-                                if (v !== undefined) {
-                                    setFilterText(v);
-                                }
-                            }
-                        }
                         // hvis menuen er blevet lukket (der er valgt noget fx ved at trykke enter) og der tastes noget igen skal menuen åbnes igen
                         ensureMenuIsOpen();
+
+                        // Vi ønsker kun at opdatere filteret og dermed valgmulighederne hvis der er blevet tastet noget.
+                        // Men vi ved reelt ikke om der er tastet noget.
+
+                        // Vi er nødt til at tilgå et privat felt på ComboBox'en for at få fat i Autofill-komponenten som bruges internt til tekstfeltet
+                        const autofillRef: React.RefObject<IAutofill | undefined> = (comboBoxRef.current as any)?._autofill;
+                        const autofill = autofillRef?.current;
+                        // Med Autofill-kompoonenten kan vi se om teksten er markeret eller ej.
+                        // Hvis teksten er markeret er det fordi ComboBox'en har sat suggestedDisplayValue til en valgmulighed
+                        // og det gør den når man bruger pilene til at markere en valgmulighed i menuen.
+                        // Det vil sige vi skal kun opdatere filterText hvis teksten i feltet ikke er markeret
+                        console.log("selection", [autofillRef?.current?.selectionEnd, autofillRef?.current?.selectionStart])
+                        if (autofill !== undefined && autofill.selectionEnd - autofill.selectionStart < (autofill.value ?? "").length) {
+                            // Vi tager teksten direkte fra Autofill-kombonenten.
+                            // Vi får ikke altid værdien ind via value og valgmuligheden i option
+                            // kan være en som er markeret med musen så den kan vi ikke regne med.
+                            setFilterText(autofill.value);
+                        }
                     }
-                }
-                }
+                }}
                 onFocus={(e) => {
                     log("onFocus", e);
                     setHasFocus(true);
@@ -182,7 +112,9 @@ export const ComboBoxDemo = () => {
                 onBlur={(e) => {
                     log("onBlur", e);
                     setHasFocus(false);
+                    setSelectedText(undefined);
                     setCurrentText(undefined);
+                    setCurrentOption(undefined);
                     setFilterText(undefined);
                 }}
                 onMenuOpen={() => {
@@ -194,7 +126,6 @@ export const ComboBoxDemo = () => {
                     log("onMenuDismissed");
                     setIsMenuOpen(false);
                 }}
-                onRenderOption={onRenderOptionWithMatchHeighlight}
             />
             <p>
                 current text: {currentText}<br />

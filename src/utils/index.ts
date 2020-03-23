@@ -2,7 +2,13 @@ export const timeoutAsync = (timeout: number) => new Promise(resolve => setTimeo
 export const getRandomString = () => Math.round((100 * Math.random())).toString();
 export const getRandomStrings = () => [getRandomString(), getRandomString(), getRandomString()];
 
-export const stringify = (obj?: any) => stringifyRecursive(0, obj);
+export const stringify = (obj?: any) => {
+    try {
+        return stringifyRecursive(0, obj);
+    } catch {
+        return "se data i konsollen";
+    }
+}
 
 const stringifyRecursive = (depth: number, obj?: any) => {
     if (obj === undefined || obj === null) {
