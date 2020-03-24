@@ -4,20 +4,13 @@ import { PrimaryButton } from "office-ui-fabric-react";
 import { TagPickerWithRefreshDemo } from "./TagPickerWithRefresh/TagPickerWithRefreshDemo";
 import { AutofillDemo } from "./Autofill/AutofillDemo";
 import { ComboBoxDemo } from "./ComboBox/ComboBoxDemo";
+import { Expandable } from "./Expandable/Expandable";
+import { CustomComboBoxDemo } from "./CustomComboBox/CustomComboBoxDemo";
 
 // needed for icons used by UI Fabric components to work
 initializeIcons();
 
-const Expandable: React.FC<{ title: string }> = (props) => {
-    const [expanded, setExpanded] = useState(false);
-    return (
-        <div style={{ margin: "20px" }}>
-            <PrimaryButton onClick={() => setExpanded((previous) => !previous)}>{props.title}</PrimaryButton>
-            {expanded && props.children}
-        </div>
-    )
 
-}
 export const App = () => {
 
     return (
@@ -26,6 +19,7 @@ export const App = () => {
 
             <Expandable title="TagPicker - Eksempel på hvordan listen af valgmuligheder kan opdateres mens den er åben"><TagPickerWithRefreshDemo /></Expandable>
             <Expandable title="Autofill - test af hvordan den bruges"><AutofillDemo /></Expandable>
-            <Expandable title="ComboBox - test af hvordan den bruges"><ComboBoxDemo /></Expandable>
+            <Expandable title="ComboBox - PoC på søgning"><ComboBoxDemo /></Expandable>
+            <Expandable title="CustomComboBox"><CustomComboBoxDemo /></Expandable>
         </>)
 };

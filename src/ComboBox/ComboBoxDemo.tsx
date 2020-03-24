@@ -48,9 +48,9 @@ export const ComboBoxDemo = () => {
     const [hasFocus, setHasFocus] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    const comboBoxRef = useRef<IComboBox>();
+    const comboBoxRef = useRef<IComboBox>(null);
     const ensureMenuIsOpen = () => {
-        if (!isMenuOpen) {
+        if (!isMenuOpen && comboBoxRef.current) {
             comboBoxRef.current.focus(true);
         }
     }
@@ -137,7 +137,7 @@ export const ComboBoxDemo = () => {
                     
                             // hvis værdien er markeret kan der ikke være tastet noget
                             //  så vi tager kun værdien hvis den ikke er markeret
-                            if(!autofill?.isValueSelected) {
+                            if(autofill && !autofill?.isValueSelected) {
                                 newText = autofill.value;
                             }
                         }

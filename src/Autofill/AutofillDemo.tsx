@@ -39,7 +39,7 @@ export const AutofillDemo = () => {
                     // onInputValueChange kaldes når værdien i feltet ændres (bl.. med returværdien af onInputChange når der tastes)
                     onInputValueChange={(value, compose) => {
                         log("onInputValueChange", [value, compose]);
-                        const suggestion = value === "" ? undefined : suggestions.find(w => w.toLocaleLowerCase().startsWith(value.toLocaleLowerCase()));
+                        const suggestion = !value ? undefined : suggestions.find(w => w.toLocaleLowerCase().startsWith(value.toLocaleLowerCase()));
                         setSuggestedValue(suggestion);
                         setWrittenValue(value);
                     }}

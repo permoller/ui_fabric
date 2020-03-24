@@ -29,6 +29,7 @@ export const TagPickerWithRefreshDemo = () => {
         // this method does not work with the generic PickerBase
         const refreshSuggestions = function (this: TagPickerBase) {
             if (!this.state.suggestionsVisible) return;
+            if(!this.input.current) return;
             const value = this.input.current.value;
             if (value === '' && (this.props.onEmptyResolveSuggestions || this.props.onEmptyInputFocus)) {
                 // calls onEmptyResolveSuggestions or onEmptyInputFocus and updates the list of suggestions
@@ -53,9 +54,15 @@ export const TagPickerWithRefreshDemo = () => {
     useEffect(() => {
         if (refreshTimeout === 0) {
             console.log("refresh");
-            refreshSuggestionsUsingCastToAnyToAccessProtectedMembers(picker1Ref.current);
-            picker2Ref.current.refreshSuggestionsUsingSubclassToAccessProtectedMembers();
-            refreshSuggestionsUsingBindingToThisToAccessProtectedMembers(picker3Ref.current);
+            if(picker1Ref.current) {
+                refreshSuggestionsUsingCastToAnyToAccessProtectedMembers(picker1Ref.current);
+            }
+            if(picker2Ref.current){
+                picker2Ref.current.refreshSuggestionsUsingSubclassToAccessProtectedMembers();
+            }
+            if(picker3Ref.current){
+                refreshSuggestionsUsingBindingToThisToAccessProtectedMembers(picker3Ref.current);
+            }
         }
 
         const timeout = setTimeout(() => setRefreshTimout(refreshTimeout > 0 ? refreshTimeout - 1 : refreshIntervalSeconds), 1000);

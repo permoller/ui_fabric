@@ -10,7 +10,7 @@ export const stringify = (obj?: any) => {
     }
 }
 
-const stringifyRecursive = (depth: number, obj?: any) => {
+const stringifyRecursive = (depth: number, obj?: any): string => {
     if (obj === undefined || obj === null) {
         return obj;
     }

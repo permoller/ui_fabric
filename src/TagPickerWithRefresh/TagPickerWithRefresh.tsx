@@ -4,6 +4,7 @@ import { getStyles } from "office-ui-fabric-react/lib/components/pickers/BasePic
 export class TagPickerWithResfreshBase extends TagPickerBase {
     public refreshSuggestionsUsingSubclassToAccessProtectedMembers = () => {
         if (!this.state.suggestionsVisible) return;
+        if(!this.input.current) return;
         const value = this.input.current.value;
         if (value === '' && (this.props.onEmptyResolveSuggestions || this.props.onEmptyInputFocus)) {
             // calls onEmptyResolveSuggestions or onEmptyInputFocus and updates the list of suggestions
